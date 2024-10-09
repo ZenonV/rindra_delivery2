@@ -20,9 +20,14 @@ if (isset($_POST['confirm_delivery'])) {
     $userOrdersController->confirmDelivery($order_id);
 }
 
-// Fetch user orders
-$orders = $userOrdersController->getUserOrders();
+// Pagination setup
+$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+$records_per_page = 10; // Number of orders per page
+$total_orders = $userOrdersController->getTotalOrders(); // Total number of orders
+$total_pages = ceil($total_orders / $records_per_page); // Total number of pages
 
+// Fetch user orders for the current page
+$orders = $userOrdersController->getUserOrders($current_page, $records_per_page);
 ?>
 
 <!DOCTYPE html>
@@ -78,6 +83,27 @@ $orders = $userOrdersController->getUserOrders();
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination Links -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item <?= ($current_page <= 1) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?page=<?= max(1, $current_page - 1) ?>" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <li class="page-item <?= ($i == $current_page) ? 'active' : '' ?>">
+                    <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                </li>
+            <?php endfor; ?>
+            <li class="page-item <?= ($current_page >= $total_pages) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?page=<?= min($total_pages, $current_page + 1) ?>" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 
     <div class="d-flex justify-content-center mt-4">
         <a href="make_order.php" class="btn btn-primary btn-lg">Make an Order</a>
