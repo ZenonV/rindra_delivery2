@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'config.php';
+include '../config.php'; // Adjust path as necessary
+include '../app/Controllers/OrderController.php'; // Include the OrderController class
 
 // Redirect if the user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -8,15 +9,15 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
+$controller = new OrderController($pdo); // Instantiate the OrderController class
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_SESSION['username'];
     $product_name = $_POST['product_name'];
     $quantity = $_POST['quantity'];
 
-    // Insert the new order into the orders table
-    $sql = "INSERT INTO orders (username, product_name, quantity, order_status, delivered) VALUES (?, ?, ?, 'pending', 0)";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$username, $product_name, $quantity]);
+    // Create a new order using the controller
+    $controller->createOrder($username, $product_name, $quantity);
 
     // Redirect back to the orders page
     header('Location: user_orders.php');
@@ -55,4 +56,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

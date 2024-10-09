@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'config.php';
+require_once '../config.php';
+require_once '../app/Controllers/UserOrdersController.php';
 
 // Redirect if the user is not logged in
 if (!isset($_SESSION['username'])) {
@@ -10,19 +11,17 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-// Fetch user orders from the database
-$sql = "SELECT * FROM orders WHERE username = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$username]);
-$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Instantiate the controller
+$userOrdersController = new UserOrdersController($pdo, $username);
 
 // Handle Confirm Delivery button
 if (isset($_POST['confirm_delivery'])) {
     $order_id = $_POST['order_id'];
-    $sql = "UPDATE orders SET order_status = 'Delivery Confirmed', user_confirmation = 'Confirmed' WHERE id = ? AND username = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$order_id, $username]);
+    $userOrdersController->confirmDelivery($order_id);
 }
+
+// Fetch user orders
+$orders = $userOrdersController->getUserOrders();
 
 ?>
 
@@ -31,7 +30,7 @@ if (isset($_POST['confirm_delivery'])) {
 <head>
     <title>Your Orders</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="orders_style.css" rel="stylesheet">
+    <link href="../assets/css/orders_style.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-5">

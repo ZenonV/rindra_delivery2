@@ -1,5 +1,9 @@
 <?php
-include 'config.php';
+require_once '../config.php';
+require_once '../app/Controllers/RegisterController.php';
+
+// Instantiate the RegisterController
+$registerController = new RegisterController($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
@@ -7,20 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // Validate passwords match
-    if ($password !== $confirm_password) {
-        echo "Passwords do not match!";
-    } else {
-        // Hash the password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // Call the register method
+    $message = $registerController->register($username, $email, $password, $confirm_password);
 
-        // Insert into users table
-        $sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$username, $email, $hashed_password]);
-
-        echo "Registration successful! You can now <a href='login.php'>login</a>.";
-    }
+    // Display any message (errors or success)
+    echo $message;
 }
 ?>
 
@@ -29,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <title>Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
 </head>
 <body>
     <div class="login-container">
@@ -59,4 +54,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </body>
 </html>
-

@@ -1,6 +1,8 @@
 <?php
 session_start();
-require 'db.php';
+include '../config.php'; // Adjust path as per your project structure
+include '../app/Models/Database.php';
+include '../app/Controllers/DriverController.php'; // Include the DriverController class
 
 // Check if the driver is logged in
 if (!isset($_SESSION['username']) || $_SESSION['status'] !== 'driver') {
@@ -9,34 +11,26 @@ if (!isset($_SESSION['username']) || $_SESSION['status'] !== 'driver') {
 }
 
 $driver_email = $_SESSION['username'];
+$controller = new DriverController($pdo); // Instantiate the DriverController class
 
 // Fetch the driver's assigned orders
-$sql = "SELECT d.id AS driver_order_id, o.id AS order_id, o.product_name, o.quantity, o.order_status, o.delivered, o.user_confirmation 
-        FROM drivers d
-        JOIN orders o ON d.product_name = o.product_name
-        WHERE d.driver_name = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$driver_email]);
-$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$orders = $controller->getAssignedOrders($driver_email);
 
 // Handle Confirm Delivery button
 if (isset($_POST['confirm_delivery'])) {
     $order_id = $_POST['order_id'];
-    $sql = "UPDATE orders SET order_status = 'Delivered', delivered = true WHERE id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$order_id]);
-    
+    $controller->confirmDelivery($order_id); // Use the controller to confirm delivery
+    // Refresh the orders after confirmation
+    $orders = $controller->getAssignedOrders($driver_email);
 }
 
 // Handle Cancel Delivery button
 if (isset($_POST['cancel_delivery'])) {
     $order_id = $_POST['order_id'];
-    $sql = "UPDATE orders SET order_status = 'Pending', delivered = false WHERE id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$order_id]);
-
+    $controller->cancelDelivery($order_id); // Use the controller to cancel delivery
+    // Refresh the orders after cancellation
+    $orders = $controller->getAssignedOrders($driver_email);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -61,6 +55,7 @@ if (isset($_POST['cancel_delivery'])) {
                         <th>Order Status</th>
                         <th>User Confirmation</th>
                         <th>Delivery Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,7 +66,7 @@ if (isset($_POST['cancel_delivery'])) {
                             <td><?= htmlspecialchars($order['order_status']); ?></td>
                             <td><?= htmlspecialchars($order['user_confirmation'] ?? 'Confirmation Awaiting'); ?></td>
                             <td><?= $order['delivered'] ? 'Delivered' : 'Pending'; ?></td>
-                            
+
                             <td>
                                 <?php if (!$order['delivered']): ?>
                                     <form method="POST" action="">
