@@ -70,6 +70,34 @@ $total_pages = $controller->getTotalPages($search, $orderStatus, $records_per_pa
                         <td><?= $order['driver_assigned'] ? 'Yes' : 'No' ?></td>
                         <td>
                             <!-- Action buttons here -->
+                            <td>
+    <?php if (!$order['driver_assigned']): ?>
+        <!-- Assign Driver button -->
+        <form method="POST" action="admin_dashboard.php" style="display:inline-block;">
+            <select name="driver_name" class="form-select" style="width: 150px; display:inline-block;">
+                <option value="Driver1">Driver1</option>
+                <option value="Driver2">Driver2</option>
+                <option value="Driver3">Driver3</option>
+            </select>
+            <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+            <button type="submit" name="assign_driver" class="btn btn-primary">Assign Driver</button>
+        </form>
+    <?php else: ?>
+        <!-- Cancel Driver Assignment button -->
+        <form method="POST" action="admin_dashboard.php" style="display:inline-block;">
+            <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+            <button type="submit" name="cancel_assignment" class="btn btn-danger">Cancel Driver</button>
+        </form>
+        <!-- Driver Assigned Confirmed -->
+        <button class="btn btn-success" disabled>Assigned</button>
+    <?php endif; ?>
+    <!-- Delete Order button -->
+    <form method="POST" action="admin_dashboard.php" style="display:inline-block;">
+        <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+        <button type="submit" name="delete_order" class="btn btn-danger">Delete</button>
+    </form>
+</td>
+
                         </td>
                     </tr>
                 <?php endforeach; ?>

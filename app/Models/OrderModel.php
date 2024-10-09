@@ -90,5 +90,13 @@ class OrderModel extends Database {
         $stmt->execute();
         return $stmt->fetchColumn();
     }
+    public function deleteOrder($orderId) {
+        // Delete the order from the orders table
+        $this->query("DELETE FROM orders WHERE id = ?", [$orderId]);
+    
+        // Also, delete any driver assignments associated with the order
+        $this->query("DELETE FROM drivers WHERE order_id = ?", [$orderId]);
+    }
+    
 }
 ?>
