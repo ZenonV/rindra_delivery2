@@ -15,3 +15,6 @@ Driver Dashboard (driver_dashboard.php)
 View Assigned Orders: Drivers can view the orders assigned to them with product details, quantity, and current delivery status.
 Mark as Delivered: Drivers can update the delivery status of the assigned orders once they deliver the product to the customer.
 Confirm Delivery by User: Once the driver marks an order as delivered, the customer will be prompted to confirm the delivery.
+
+
+Some of the files outside repositories are currently not used for the project.
